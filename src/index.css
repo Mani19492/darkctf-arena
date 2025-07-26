@@ -8,35 +8,53 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Cyberpunk Black Theme */
+    --background: 240 10% 3.9%;
+    --foreground: 120 100% 85%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 240 8% 6%;
+    --card-foreground: 120 100% 85%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 240 8% 6%;
+    --popover-foreground: 120 100% 85%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 120 100% 50%;
+    --primary-foreground: 240 10% 3.9%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 200 100% 50%;
+    --secondary-foreground: 240 10% 3.9%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 240 5% 15%;
+    --muted-foreground: 240 5% 64.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 280 100% 70%;
+    --accent-foreground: 240 10% 3.9%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 240 6% 20%;
+    --input: 240 6% 15%;
+    --ring: 120 100% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Custom cyberpunk variables */
+    --neon-green: 120 100% 50%;
+    --neon-blue: 200 100% 50%;
+    --neon-purple: 280 100% 70%;
+    --cyber-dark: 240 10% 3.9%;
+    --cyber-darker: 240 15% 2%;
+    --cyber-light: 240 5% 15%;
+    
+    /* Gradients */
+    --gradient-cyber: linear-gradient(135deg, hsl(var(--neon-green)) 0%, hsl(var(--neon-blue)) 50%, hsl(var(--neon-purple)) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(var(--cyber-dark)) 0%, hsl(var(--cyber-darker)) 100%);
+    
+    /* Shadows */
+    --shadow-neon: 0 0 20px hsl(var(--neon-green) / 0.5);
+    --shadow-neon-blue: 0 0 20px hsl(var(--neon-blue) / 0.5);
+    --shadow-neon-purple: 0 0 20px hsl(var(--neon-purple) / 0.5);
 
     --sidebar-background: 0 0% 98%;
 

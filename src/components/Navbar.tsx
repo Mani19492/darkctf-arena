@@ -1,0 +1,72 @@
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { useCTFStore } from '@/lib/store';
+import { Terminal, Shield, User, LogOut, Settings } from 'lucide-react';
+
+const Navbar: React.FC = () => {
+  const { currentUser, logout, currentView, setCurrentView } = useCTFStore();
+
+  const navItems = [
+    { id: 'challenges', label: 'Challenges', icon: Terminal },
+    { id: 'leaderboard', label: 'Leaderboard', icon: Shield },
+    { id: 'profile', label: 'Profile', icon: User },
+  ];
+
+  if (currentUser?.isAdmin) {
+    navItems.push({ id: 'admin', label: 'Admin', icon: Settings });
+  }
+
+  return (
+    <nav className="bg-card/80 backdrop-blur-sm border-b border-cyber-light shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center">
+            <div className="flex items-center">
+              <Terminal className="h-8 w-8 text-neon-green shadow-neon" />
+              <span className="ml-2 text-2xl font-bold bg-gradient-cyber bg-clip-text text-transparent">
+                CyberCTF
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Button
+                  key={item.id}
+                  variant={currentView === item.id ? "default" : "ghost"}
+                  onClick={() => setCurrentView(item.id)}
+                  className={`
+                    ${currentView === item.id 
+                      ? 'bg-neon-green text-cyber-dark shadow-neon' 
+                      : 'text-foreground hover:text-neon-green hover:bg-cyber-light'
+                    }
+                  `}
+                >
+                  <Icon className="h-4 w-4 mr-2" />
+                  {item.label}
+                </Button>
+              );
+            })}
+            
+            <div className="text-sm text-muted-foreground">
+              Welcome, <span className="text-neon-blue font-semibold">{currentUser?.username}</span>
+            </div>
+            
+            <Button
+              variant="ghost"
+              onClick={logout}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;

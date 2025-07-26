@@ -61,7 +61,27 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Cyberpunk theme colors
+				neon: {
+					green: 'hsl(var(--neon-green))',
+					blue: 'hsl(var(--neon-blue))',
+					purple: 'hsl(var(--neon-purple))'
+				},
+				cyber: {
+					dark: 'hsl(var(--cyber-dark))',
+					darker: 'hsl(var(--cyber-darker))',
+					light: 'hsl(var(--cyber-light))'
 				}
+			},
+			backgroundImage: {
+				'gradient-cyber': 'var(--gradient-cyber)',
+				'gradient-dark': 'var(--gradient-dark)'
+			},
+			boxShadow: {
+				'neon': 'var(--shadow-neon)',
+				'neon-blue': 'var(--shadow-neon-blue)',
+				'neon-purple': 'var(--shadow-neon-purple)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
