@@ -275,7 +275,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      make_user_admin: {
+        Args: { user_email: string }
+        Returns: boolean
+      }
     }
     Enums: {
       challenge_category:
