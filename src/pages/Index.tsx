@@ -1,7 +1,7 @@
-import CTFPlatform from '@/components/CTFPlatform';
+import LandingPage from '@/components/LandingPage';
 
 const Index = () => {
-  return <CTFPlatform />;
+  return <LandingPage />;
 };
 
 export default Index;

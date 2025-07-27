@@ -14,7 +14,262 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      challenges: {
+        Row: {
+          category: Database["public"]["Enums"]["challenge_category"]
+          created_at: string
+          ctf_event_id: string
+          description: string
+          enabled: boolean
+          files: string[] | null
+          flag: string
+          hints: Json | null
+          id: string
+          points: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["challenge_category"]
+          created_at?: string
+          ctf_event_id: string
+          description: string
+          enabled?: boolean
+          files?: string[] | null
+          flag: string
+          hints?: Json | null
+          id?: string
+          points: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["challenge_category"]
+          created_at?: string
+          ctf_event_id?: string
+          description?: string
+          enabled?: boolean
+          files?: string[] | null
+          flag?: string
+          hints?: Json | null
+          id?: string
+          points?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenges_ctf_event_id_fkey"
+            columns: ["ctf_event_id"]
+            isOneToOne: false
+            referencedRelation: "ctf_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ctf_events: {
+        Row: {
+          created_at: string
+          created_by: string
+          ctf_code: string
+          description: string | null
+          enabled: boolean
+          end_time: string
+          id: string
+          is_public: boolean
+          name: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          ctf_code: string
+          description?: string | null
+          enabled?: boolean
+          end_time: string
+          id?: string
+          is_public?: boolean
+          name: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          ctf_code?: string
+          description?: string | null
+          enabled?: boolean
+          end_time?: string
+          id?: string
+          is_public?: boolean
+          name?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ctf_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_admin: boolean
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          is_admin?: boolean
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_admin?: boolean
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          challenge_id: string
+          flag: string
+          id: string
+          is_correct: boolean
+          submitted_at: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          flag: string
+          id?: string
+          is_correct: boolean
+          submitted_at?: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          flag?: string
+          id?: string
+          is_correct?: boolean
+          submitted_at?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          id: string
+          joined_at: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          ctf_event_id: string
+          id: string
+          is_solo: boolean
+          name: string
+          points: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ctf_event_id: string
+          id?: string
+          is_solo?: boolean
+          name: string
+          points?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ctf_event_id?: string
+          id?: string
+          is_solo?: boolean
+          name?: string
+          points?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_ctf_event_id_fkey"
+            columns: ["ctf_event_id"]
+            isOneToOne: false
+            referencedRelation: "ctf_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +278,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      challenge_category:
+        | "Web"
+        | "Pwn"
+        | "Crypto"
+        | "Forensics"
+        | "Reverse"
+        | "Misc"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +411,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      challenge_category: [
+        "Web",
+        "Pwn",
+        "Crypto",
+        "Forensics",
+        "Reverse",
+        "Misc",
+      ],
+    },
   },
 } as const
