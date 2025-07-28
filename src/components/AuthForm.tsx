@@ -19,6 +19,7 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -60,7 +61,8 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            username
+            username,
+            phone_number: phoneNumber
           }
         }
       });
@@ -137,15 +139,20 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
         const { data: profile } = await supabase
           .from('profiles')
           .select('is_admin')
-          .eq('id', user?.id)
+          .eq('id', session?.user?.id)
           .single();
 
         if (!profile?.is_admin) {
           await supabase.auth.signOut();
           toast({
             title: "Access denied",
-            description: "You don't have administrator privileges",
+            description: "This platform is restricted to administrators only",
             variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Admin access granted",
+            description: "Welcome to the CTF Administration Platform"
           });
         }
       }
@@ -174,33 +181,29 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
 
         <Card className="bg-card/80 backdrop-blur border-border/50">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Welcome to CTF Platform</CardTitle>
+            <CardTitle className="text-2xl">CTF Admin Portal</CardTitle>
             <CardDescription>
-              Choose your authentication method
+              Administrator access only - Sign up or sign in with admin credentials
             </CardDescription>
           </CardHeader>
           
           <CardContent>
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'signup' | 'admin')}>
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login" className="flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  Login
+                  <Shield className="w-4 h-4" />
+                  Admin Login
                 </TabsTrigger>
                 <TabsTrigger value="signup" className="flex items-center gap-2">
                   <UserPlus className="w-4 h-4" />
-                  Sign Up
-                </TabsTrigger>
-                <TabsTrigger value="admin" className="flex items-center gap-2">
-                  <Shield className="w-4 h-4" />
-                  Admin
+                  Create Admin
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="login" className="space-y-4">
-                <form onSubmit={handleSignIn} className="space-y-4">
+                <form onSubmit={handleAdminLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">Admin Email</Label>
                     <Input
                       id="email"
                       type="email"
@@ -210,7 +213,7 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">Admin Password</Label>
                     <Input
                       id="password"
                       type="password"
@@ -220,7 +223,7 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Signing in..." : "Sign In"}
+                    {loading ? "Signing in..." : "Admin Sign In"}
                   </Button>
                 </form>
               </TabsContent>
@@ -238,7 +241,17 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-phone">Phone Number</Label>
+                    <Input
+                      id="signup-phone"
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Admin Email</Label>
                     <Input
                       id="signup-email"
                       type="email"
@@ -248,7 +261,7 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                    <Label htmlFor="signup-password">Admin Password</Label>
                     <Input
                       id="signup-password"
                       type="password"
@@ -259,35 +272,7 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating account..." : "Create Account"}
-                  </Button>
-                </form>
-              </TabsContent>
-
-              <TabsContent value="admin" className="space-y-4">
-                <form onSubmit={handleAdminLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="admin-email">Admin Email</Label>
-                    <Input
-                      id="admin-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="admin-password">Admin Password</Label>
-                    <Input
-                      id="admin-password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Signing in..." : "Admin Sign In"}
+                    {loading ? "Creating admin..." : "Create Admin Account"}
                   </Button>
                 </form>
               </TabsContent>

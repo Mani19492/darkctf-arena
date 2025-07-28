@@ -49,6 +49,10 @@ const ProfileView: React.FC = () => {
               <div className="text-lg font-semibold text-neon-blue">{profile?.username || 'Loading...'}</div>
             </div>
             <div>
+              <label className="text-sm text-muted-foreground">Phone Number</label>
+              <div className="text-lg">{profile?.phone_number || 'Not provided'}</div>
+            </div>
+            <div>
               <label className="text-sm text-muted-foreground">Email</label>
               <div className="text-lg">{currentUser?.email}</div>
             </div>
@@ -109,6 +113,9 @@ const CTFPlatform: React.FC = () => {
         return <AdminPanel />;
       case 'profile':
         return <ProfileView />;
+      case 'admin-users':
+        const AdminUserManagement = React.lazy(() => import('./AdminUserManagement'));
+        return <React.Suspense fallback={<div>Loading...</div>}><AdminUserManagement /></React.Suspense>;
       default:
         return <ChallengeList />;
     }

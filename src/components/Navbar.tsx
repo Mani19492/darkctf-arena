@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCTFStore } from '@/lib/store';
-import { Terminal, Shield, User, LogOut, Settings } from 'lucide-react';
+import { Terminal, Shield, User, LogOut, Settings, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Navbar: React.FC = () => {
@@ -28,7 +28,10 @@ const Navbar: React.FC = () => {
   ];
 
   if (isAdmin) {
-    navItems.push({ id: 'admin', label: 'Admin', icon: Settings });
+    navItems.push(
+      { id: 'admin', label: 'CTF Admin', icon: Settings },
+      { id: 'admin-users', label: 'User Admin', icon: Users }
+    );
   }
 
   return (

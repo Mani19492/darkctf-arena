@@ -17,7 +17,7 @@ interface CTFStore {
   teams: Team[];
   
   // UI state
-  currentView: 'challenges' | 'leaderboard' | 'admin' | 'profile' | 'login';
+  currentView: 'challenges' | 'leaderboard' | 'admin' | 'profile' | 'admin-users' | 'login';
   selectedChallenge: Challenge | null;
   
   // Actions

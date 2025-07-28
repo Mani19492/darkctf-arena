@@ -123,6 +123,7 @@ export type Database = {
           email: string
           id: string
           is_admin: boolean
+          phone_number: string | null
           updated_at: string
           username: string
         }
@@ -131,6 +132,7 @@ export type Database = {
           email: string
           id: string
           is_admin?: boolean
+          phone_number?: string | null
           updated_at?: string
           username: string
         }
@@ -139,6 +141,7 @@ export type Database = {
           email?: string
           id?: string
           is_admin?: boolean
+          phone_number?: string | null
           updated_at?: string
           username?: string
         }
@@ -275,6 +278,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_admin_user: {
+        Args: { user_email: string; user_username: string; user_phone: string }
+        Returns: string
+      }
+      is_admin_user: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       make_user_admin: {
         Args: { user_email: string }
         Returns: boolean
