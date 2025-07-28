@@ -1,10 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCTFStore } from '@/lib/store';
 import { Terminal, Shield, User, LogOut, Settings } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Navbar: React.FC = () => {
-  const { currentUser, logout, currentView, setCurrentView } = useCTFStore();
+  const { currentUser, isAdmin, logout, currentView, setCurrentView } = useCTFStore();
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    if (currentUser) {
+      supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', currentUser.id)
+        .single()
+        .then(({ data }) => {
+          setProfile(data);
+        });
+    }
+  }, [currentUser]);
 
   const navItems = [
     { id: 'challenges', label: 'Challenges', icon: Terminal },
@@ -12,7 +27,7 @@ const Navbar: React.FC = () => {
     { id: 'profile', label: 'Profile', icon: User },
   ];
 
-  if (currentUser?.isAdmin) {
+  if (isAdmin) {
     navItems.push({ id: 'admin', label: 'Admin', icon: Settings });
   }
 
@@ -51,7 +66,7 @@ const Navbar: React.FC = () => {
             })}
             
             <div className="text-sm text-muted-foreground">
-              Welcome, <span className="text-neon-blue font-semibold">{currentUser?.username}</span>
+              Welcome, <span className="text-neon-blue font-semibold">{profile?.username || 'User'}</span>
             </div>
             
             <Button

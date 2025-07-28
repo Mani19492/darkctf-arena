@@ -1,11 +1,15 @@
 import { create } from 'zustand';
 import { User, Team, CTFEvent, Challenge } from '../types/ctf';
 import { mockUser, mockAdmin, mockTeams, mockCTF, mockChallenges } from './mockData';
+import { supabase } from '@/integrations/supabase/client';
+import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
 interface CTFStore {
   // Auth state
-  currentUser: User | null;
+  currentUser: SupabaseUser | null;
+  session: Session | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   
   // CTF data
   currentCTF: CTFEvent | null;
@@ -17,7 +21,8 @@ interface CTFStore {
   selectedChallenge: Challenge | null;
   
   // Actions
-  login: (username: string, password: string) => boolean;
+  setUser: (user: SupabaseUser | null) => void;
+  setSession: (session: Session | null) => void;
   logout: () => void;
   setCurrentView: (view: string) => void;
   setSelectedChallenge: (challenge: Challenge | null) => void;
@@ -33,7 +38,9 @@ interface CTFStore {
 export const useCTFStore = create<CTFStore>((set, get) => ({
   // Initial state
   currentUser: null,
+  session: null,
   isAuthenticated: false,
+  isAdmin: false,
   currentCTF: mockCTF,
   challenges: mockChallenges,
   teams: mockTeams,
@@ -41,30 +48,38 @@ export const useCTFStore = create<CTFStore>((set, get) => ({
   selectedChallenge: null,
   
   // Actions
-  login: (username: string, password: string) => {
-    // Mock authentication
-    if (username === 'admin' && password === 'admin123') {
-      set({ 
-        currentUser: mockAdmin, 
-        isAuthenticated: true,
-        currentView: 'admin'
-      });
-      return true;
-    } else if (username === 'hacker' && password === 'password') {
-      set({ 
-        currentUser: mockUser, 
-        isAuthenticated: true,
-        currentView: 'challenges'
-      });
-      return true;
+  setUser: (user: SupabaseUser | null) => {
+    set({ 
+      currentUser: user,
+      isAuthenticated: !!user
+    });
+    
+    // Check if user is admin
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single()
+        .then(({ data }) => {
+          set({ isAdmin: data?.is_admin || false });
+        });
+    } else {
+      set({ isAdmin: false });
     }
-    return false;
+  },
+
+  setSession: (session: Session | null) => {
+    set({ session });
   },
   
-  logout: () => {
+  logout: async () => {
+    await supabase.auth.signOut();
     set({ 
-      currentUser: null, 
+      currentUser: null,
+      session: null,
       isAuthenticated: false,
+      isAdmin: false,
       currentView: 'login'
     });
   },

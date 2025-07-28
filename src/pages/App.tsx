@@ -1,7 +1,12 @@
 import CTFPlatform from '@/components/CTFPlatform';
+import AuthProvider from '@/components/AuthProvider';
 
 const App = () => {
-  return <CTFPlatform />;
+  return (
+    <AuthProvider>
+      <CTFPlatform />
+    </AuthProvider>
+  );
 };
 
 export default App;

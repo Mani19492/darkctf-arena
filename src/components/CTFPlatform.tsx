@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCTFStore } from '@/lib/store';
-import LoginForm from './LoginForm';
 import Navbar from './Navbar';
 import ChallengeList from './ChallengeList';
 import Leaderboard from './Leaderboard';
@@ -8,9 +7,24 @@ import AdminPanel from './AdminPanel';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { User, Shield, Clock } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const ProfileView: React.FC = () => {
-  const { currentUser } = useCTFStore();
+  const { currentUser, isAdmin } = useCTFStore();
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    if (currentUser) {
+      supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single()
+        .then(({ data }) => {
+          setProfile(data);
+        });
+    }
+  }, [currentUser]);
   
   return (
     <div className="space-y-6">
@@ -32,7 +46,7 @@ const ProfileView: React.FC = () => {
           <CardContent className="space-y-4">
             <div>
               <label className="text-sm text-muted-foreground">Username</label>
-              <div className="text-lg font-semibold text-neon-blue">{currentUser?.username}</div>
+              <div className="text-lg font-semibold text-neon-blue">{profile?.username || 'Loading...'}</div>
             </div>
             <div>
               <label className="text-sm text-muted-foreground">Email</label>
@@ -40,8 +54,8 @@ const ProfileView: React.FC = () => {
             </div>
             <div>
               <label className="text-sm text-muted-foreground">Role</label>
-              <Badge className={currentUser?.isAdmin ? 'bg-neon-purple text-cyber-dark' : 'bg-neon-green text-cyber-dark'}>
-                {currentUser?.isAdmin ? 'Administrator' : 'Hacker'}
+              <Badge className={isAdmin ? 'bg-neon-purple text-cyber-dark' : 'bg-neon-green text-cyber-dark'}>
+                {isAdmin ? 'Administrator' : 'Hacker'}
               </Badge>
             </div>
           </CardContent>
@@ -80,7 +94,9 @@ const CTFPlatform: React.FC = () => {
   const { isAuthenticated, currentView } = useCTFStore();
 
   if (!isAuthenticated) {
-    return <LoginForm />;
+    // Redirect to home page for authentication
+    window.location.href = '/';
+    return null;
   }
 
   const renderCurrentView = () => {
