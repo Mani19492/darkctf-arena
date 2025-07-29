@@ -10,12 +10,15 @@ import { useToast } from '@/hooks/use-toast';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 interface AuthFormProps {
-  mode: 'login' | 'signup' | 'admin';
+  mode: 'participant-login' | 'participant-signup' | 'admin';
   onBack: () => void;
 }
 
 const AuthForm = ({ mode, onBack }: AuthFormProps) => {
-  const [activeTab, setActiveTab] = useState(mode);
+  const [activeTab, setActiveTab] = useState(
+    mode === 'participant-login' ? 'login' : 
+    mode === 'participant-signup' ? 'signup' : 'admin'
+  );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
@@ -33,8 +36,31 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Redirect to main app after successful login
-          window.location.href = '/app';
+          // Check if user is admin for admin mode, allow regular users for participant mode
+          if (mode === 'admin') {
+            // For admin mode, check admin status
+            supabase
+              .from('profiles')
+              .select('is_admin')
+              .eq('id', session.user.id)
+              .single()
+              .then(({ data }) => {
+                if (data?.is_admin) {
+                  window.location.href = '/app';
+                } else {
+                  // Not an admin, sign them out
+                  supabase.auth.signOut();
+                  toast({
+                    title: "Access denied",
+                    description: "This platform is restricted to administrators only",
+                    variant: "destructive"
+                  });
+                }
+              });
+          } else {
+            // For participant mode, redirect directly
+            window.location.href = '/app';
+          }
         }
       }
     );
@@ -54,6 +80,17 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
 
     try {
       const redirectUrl = `${window.location.origin}/app`;
+      
+      // Only allow participant signup for non-admin modes
+      if (mode === 'admin') {
+        toast({
+          title: "Invalid signup",
+          description: "Admin accounts must be created by existing administrators",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
       
       const { error } = await supabase.auth.signUp({
         email,
@@ -95,7 +132,7 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
@@ -106,6 +143,24 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
           description: error.message,
           variant: "destructive"
         });
+      } else if (data.user) {
+        // Check admin status if this is admin login
+        if (mode === 'admin') {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', data.user.id)
+            .single();
+
+          if (!profile?.is_admin) {
+            await supabase.auth.signOut();
+            toast({
+              title: "Access denied",
+              description: "This platform is restricted to administrators only",
+              variant: "destructive"
+            });
+          }
+        }
       }
     } catch (error) {
       toast({
@@ -173,110 +228,151 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
         <Button
           variant="ghost"
           onClick={onBack}
-          className="mb-6 text-muted-foreground hover:text-foreground"
+          className="mb-6 text-muted-foreground hover:text-foreground hover-scale"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to home
         </Button>
 
-        <Card className="bg-card/80 backdrop-blur border-border/50">
+        <Card className="bg-card/80 backdrop-blur border-border/50 hover-glow animate-scale-in">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">CTF Admin Portal</CardTitle>
+            <CardTitle className="text-2xl">
+              {mode === 'admin' ? 'CTF Admin Portal' : 'CTF Platform'}
+            </CardTitle>
             <CardDescription>
-              Administrator access only - Sign up or sign in with admin credentials
+              {mode === 'admin' 
+                ? 'Administrator access only' 
+                : 'Join CTF competitions and test your cybersecurity skills'
+              }
             </CardDescription>
           </CardHeader>
           
           <CardContent>
-            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'signup' | 'admin')}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login" className="flex items-center gap-2">
-                  <Shield className="w-4 h-4" />
-                  Admin Login
-                </TabsTrigger>
-                <TabsTrigger value="signup" className="flex items-center gap-2">
-                  <UserPlus className="w-4 h-4" />
-                  Create Admin
-                </TabsTrigger>
-              </TabsList>
+            {mode === 'admin' ? (
+              <form onSubmit={handleAdminLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Admin Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="hover-glow"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Admin Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="hover-glow"
+                  />
+                </div>
+                <Button type="submit" className="w-full hover-scale" disabled={loading}>
+                  {loading ? "Signing in..." : "Admin Sign In"}
+                </Button>
+              </form>
+            ) : (
+              <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'signup')}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="login" className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Login
+                  </TabsTrigger>
+                  <TabsTrigger value="signup" className="flex items-center gap-2">
+                    <UserPlus className="w-4 h-4" />
+                    Sign Up
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="login" className="space-y-4">
-                <form onSubmit={handleAdminLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Admin Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Admin Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Signing in..." : "Admin Sign In"}
-                  </Button>
-                </form>
-              </TabsContent>
+                <TabsContent value="login" className="space-y-4">
+                  <form onSubmit={handleSignIn} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="login-email">Email</Label>
+                      <Input
+                        id="login-email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="hover-glow"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="login-password">Password</Label>
+                      <Input
+                        id="login-password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="hover-glow"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full hover-scale" disabled={loading}>
+                      {loading ? "Signing in..." : "Sign In"}
+                    </Button>
+                  </form>
+                </TabsContent>
 
-              <TabsContent value="signup" className="space-y-4">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="username">Username</Label>
-                    <Input
-                      id="username"
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-phone">Phone Number</Label>
-                    <Input
-                      id="signup-phone"
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Admin Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Admin Password</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating admin..." : "Create Admin Account"}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
+                <TabsContent value="signup" className="space-y-4">
+                  <form onSubmit={handleSignUp} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="username">Username</Label>
+                      <Input
+                        id="username"
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                        className="hover-glow"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-phone">Phone Number</Label>
+                      <Input
+                        id="signup-phone"
+                        type="tel"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        required
+                        className="hover-glow"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">Email</Label>
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="hover-glow"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">Password</Label>
+                      <Input
+                        id="signup-password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={6}
+                        className="hover-glow"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full hover-scale" disabled={loading}>
+                      {loading ? "Creating account..." : "Create Account"}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            )}
           </CardContent>
         </Card>
       </div>
