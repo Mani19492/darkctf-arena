@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, Users, Trophy, Code, UserCheck, ShieldCheck } from 'lucide-react';
+import { Shield, Users, Trophy, Code } from 'lucide-react';
 import AuthForm from './AuthForm';
 
 const LandingPage = () => {
   const [showAuth, setShowAuth] = useState(false);
-  const [authMode, setAuthMode] = useState<'participant-login' | 'participant-signup' | 'admin'>('participant-login');
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'admin'>('login');
 
-  const handleAuthClick = (mode: 'participant-login' | 'participant-signup' | 'admin') => {
+  const handleAuthClick = (mode: 'login' | 'signup' | 'admin') => {
     setAuthMode(mode);
     setShowAuth(true);
   };
@@ -19,74 +19,42 @@ const LandingPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-dark overflow-hidden">
+    <div className="min-h-screen bg-gradient-dark">
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-16 relative">
+      <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16 animate-fade-in">
-          <h1 className="text-6xl font-bold mb-6 gradient-text animate-glow">
+          <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-highlight bg-clip-text text-transparent hover-scale">
             CTF Platform
           </h1>
-          <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto animate-slide-up">
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-slide-up">
             Join the ultimate cybersecurity challenge. Test your skills, compete with teams, 
             and prove your expertise in capture-the-flag competitions.
           </p>
           
-          {/* Participant Section */}
-          <div className="mb-12 animate-scale-in stagger-1">
-            <Card className="max-w-2xl mx-auto bg-card/80 backdrop-blur border-border/50 hover-scale hover-glow">
-              <CardHeader className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-highlight-secondary to-highlight rounded-full flex items-center justify-center mx-auto mb-4 animate-float">
-                  <UserCheck className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-2xl">For Participants & Hackers</CardTitle>
-                <CardDescription>
-                  Join CTF competitions, solve challenges, and compete with teams
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button 
-                    size="lg" 
-                    onClick={() => handleAuthClick('participant-signup')}
-                    className="bg-gradient-to-r from-highlight-secondary to-highlight hover:opacity-90 text-white hover-scale"
-                  >
-                    Join as Participant
-                  </Button>
-                  <Button 
-                    size="lg" 
-                    variant="outline" 
-                    onClick={() => handleAuthClick('participant-login')}
-                    className="hover-glow"
-                  >
-                    Participant Login
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Admin Section */}
-          <div className="animate-scale-in stagger-2">
-            <Card className="max-w-lg mx-auto bg-card/80 backdrop-blur border-border/50 hover-scale hover-glow">
-              <CardHeader className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-highlight-accent to-destructive rounded-full flex items-center justify-center mx-auto mb-4 animate-float" style={{ animationDelay: '1s' }}>
-                  <ShieldCheck className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-xl">Admin Portal</CardTitle>
-                <CardDescription>
-                  Manage CTF events, challenges, and platform administration
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button 
-                  size="lg" 
-                  onClick={() => handleAuthClick('admin')}
-                  className="w-full bg-gradient-to-r from-highlight-accent to-destructive hover:opacity-90 text-white hover-scale"
-                >
-                  Admin Access
-                </Button>
-              </CardContent>
-            </Card>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg" 
+              onClick={() => handleAuthClick('signup')}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground hover-scale animate-scale-in stagger-1"
+            >
+              Get Started
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              onClick={() => handleAuthClick('login')}
+              className="hover-glow animate-scale-in stagger-2"
+            >
+              Sign In
+            </Button>
+            <Button 
+              size="lg" 
+              variant="secondary" 
+              onClick={() => handleAuthClick('admin')}
+              className="hover-scale animate-scale-in stagger-3"
+            >
+              Admin Portal
+            </Button>
           </div>
         </div>
 
@@ -143,11 +111,11 @@ const LandingPage = () => {
 
         {/* How it Works */}
         <div className="text-center animate-fade-in">
-          <h2 className="text-3xl font-bold mb-8 gradient-text">How it Works</h2>
+          <h2 className="text-3xl font-bold mb-8 bg-gradient-to-r from-primary to-highlight bg-clip-text text-transparent">How it Works</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="space-y-4 animate-slide-up stagger-1 hover-scale">
-              <div className="w-16 h-16 bg-gradient-to-r from-highlight to-highlight-secondary rounded-full flex items-center justify-center mx-auto animate-glow">
-                <span className="text-2xl font-bold text-white">1</span>
+              <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto animate-glow">
+                <span className="text-2xl font-bold text-primary">1</span>
               </div>
               <h3 className="text-xl font-semibold">Join a CTF</h3>
               <p className="text-muted-foreground">
@@ -156,8 +124,8 @@ const LandingPage = () => {
             </div>
             
             <div className="space-y-4 animate-slide-up stagger-2 hover-scale">
-              <div className="w-16 h-16 bg-gradient-to-r from-highlight-secondary to-highlight-accent rounded-full flex items-center justify-center mx-auto animate-glow">
-                <span className="text-2xl font-bold text-white">2</span>
+              <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto animate-glow">
+                <span className="text-2xl font-bold text-primary">2</span>
               </div>
               <h3 className="text-xl font-semibold">Form Your Team</h3>
               <p className="text-muted-foreground">
@@ -166,8 +134,8 @@ const LandingPage = () => {
             </div>
             
             <div className="space-y-4 animate-slide-up stagger-3 hover-scale">
-              <div className="w-16 h-16 bg-gradient-to-r from-highlight-accent to-highlight rounded-full flex items-center justify-center mx-auto animate-glow">
-                <span className="text-2xl font-bold text-white">3</span>
+              <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto animate-glow">
+                <span className="text-2xl font-bold text-primary">3</span>
               </div>
               <h3 className="text-xl font-semibold">Solve Challenges</h3>
               <p className="text-muted-foreground">

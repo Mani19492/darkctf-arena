@@ -10,15 +10,12 @@ import { useToast } from '@/hooks/use-toast';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 interface AuthFormProps {
-  mode: 'participant-login' | 'participant-signup' | 'admin';
+  mode: 'login' | 'signup' | 'admin';
   onBack: () => void;
 }
 
 const AuthForm = ({ mode, onBack }: AuthFormProps) => {
-  const [activeTab, setActiveTab] = useState(
-    mode === 'participant-login' ? 'login' : 
-    mode === 'participant-signup' ? 'signup' : 'admin'
-  );
+  const [activeTab, setActiveTab] = useState(mode === 'admin' ? 'admin' : mode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
@@ -241,7 +238,7 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
             </CardTitle>
             <CardDescription>
               {mode === 'admin' 
-                ? 'Administrator access only' 
+                ? 'Administrator access only - Sign in with admin credentials' 
                 : 'Join CTF competitions and test your cybersecurity skills'
               }
             </CardDescription>
@@ -249,7 +246,7 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
           
           <CardContent>
             {mode === 'admin' ? (
-              <form onSubmit={handleAdminLogin} className="space-y-4">
+              <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Admin Email</Label>
                   <Input
@@ -259,6 +256,7 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="hover-glow"
+                    placeholder="spmteja09@gmail.com or spmteja20@gmail.com"
                   />
                 </div>
                 <div className="space-y-2">
@@ -270,6 +268,7 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     className="hover-glow"
+                    placeholder="Mani@2011"
                   />
                 </div>
                 <Button type="submit" className="w-full hover-scale" disabled={loading}>
