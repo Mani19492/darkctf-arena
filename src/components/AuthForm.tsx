@@ -175,15 +175,24 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      let result;
+      // For admin login with simple credentials
+      if (email === 'admin' && password === 'password') {
+        result = await supabase.auth.signInWithPassword({
+          email: 'admin@admin.com',
+          password: 'Mani@2011'
+        });
+      } else {
+        result = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+      }
 
-      if (error) {
+      if (result.error) {
         toast({
           title: "Admin login failed",
-          description: error.message,
+          description: result.error.message,
           variant: "destructive"
         });
       } else {
@@ -256,7 +265,7 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="hover-glow"
-                    placeholder="spmteja09@gmail.com or spmteja20@gmail.com"
+                    placeholder="admin"
                   />
                 </div>
                 <div className="space-y-2">
@@ -268,7 +277,7 @@ const AuthForm = ({ mode, onBack }: AuthFormProps) => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     className="hover-glow"
-                    placeholder="Mani@2011"
+                    placeholder="password"
                   />
                 </div>
                 <Button type="submit" className="w-full hover-scale" disabled={loading}>
