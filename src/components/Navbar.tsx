@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCTFStore } from '@/lib/store';
-import { Terminal, Shield, User, LogOut, Settings, Users } from 'lucide-react';
+import { Terminal, Shield, User, LogOut, Settings, Users, Crown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Navbar: React.FC = () => {
@@ -24,13 +24,15 @@ const Navbar: React.FC = () => {
   const navItems = [
     { id: 'challenges', label: 'Challenges', icon: Terminal },
     { id: 'leaderboard', label: 'Leaderboard', icon: Shield },
+    { id: 'htb-leaderboard', label: 'HTB Club', icon: Crown },
     { id: 'profile', label: 'Profile', icon: User },
   ];
 
   if (isAdmin) {
     navItems.push(
       { id: 'admin', label: 'CTF Admin', icon: Settings },
-      { id: 'admin-users', label: 'User Admin', icon: Users }
+      { id: 'admin-users', label: 'User Admin', icon: Users },
+      { id: 'admin-htb', label: 'HTB Requests', icon: Shield }
     );
   }
 

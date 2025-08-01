@@ -1,10 +1,19 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockLeaderboard } from '@/lib/mockData';
+import { supabase } from '@/integrations/supabase/client';
 import { Trophy, Medal, Award, Clock } from 'lucide-react';
 
+interface LeaderboardEntry {
+  rank: number;
+  teamName: string;
+  points: number;
+  lastSubmission: Date;
+  solvedChallenges: number;
+}
+
 const Leaderboard: React.FC = () => {
+  const [leaderboard, setLeaderboard] = React.useState<LeaderboardEntry[]>([]);
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
@@ -49,8 +58,13 @@ const Leaderboard: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {mockLeaderboard.map((entry) => (
+          {leaderboard.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No teams have submitted solutions yet. Be the first!
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {leaderboard.map((entry) => (
               <div
                 key={entry.rank}
                 className={`
@@ -85,6 +99,7 @@ const Leaderboard: React.FC = () => {
               </div>
             ))}
           </div>
+          )}
         </CardContent>
       </Card>
 
@@ -93,7 +108,7 @@ const Leaderboard: React.FC = () => {
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-neon-green">
-                {mockLeaderboard.length}
+                {leaderboard.length}
               </div>
               <div className="text-sm text-muted-foreground">Active Teams</div>
             </div>
@@ -104,7 +119,7 @@ const Leaderboard: React.FC = () => {
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-neon-blue">
-                {mockLeaderboard.reduce((sum, entry) => sum + entry.solvedChallenges, 0)}
+                {leaderboard.reduce((sum, entry) => sum + entry.solvedChallenges, 0)}
               </div>
               <div className="text-sm text-muted-foreground">Total Solves</div>
             </div>
@@ -115,7 +130,7 @@ const Leaderboard: React.FC = () => {
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-neon-purple">
-                {Math.max(...mockLeaderboard.map(entry => entry.points))}
+                {leaderboard.length > 0 ? Math.max(...leaderboard.map(entry => entry.points)) : 0}
               </div>
               <div className="text-sm text-muted-foreground">Highest Score</div>
             </div>

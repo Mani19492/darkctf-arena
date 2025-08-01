@@ -17,7 +17,7 @@ interface CTFStore {
   teams: Team[];
   
   // UI state
-  currentView: 'challenges' | 'leaderboard' | 'admin' | 'profile' | 'admin-users' | 'login';
+  currentView: 'challenges' | 'leaderboard' | 'admin' | 'profile' | 'admin-users' | 'login' | 'htb-leaderboard' | 'admin-htb';
   selectedChallenge: Challenge | null;
   
   // Actions
@@ -27,6 +27,8 @@ interface CTFStore {
   setCurrentView: (view: string) => void;
   setSelectedChallenge: (challenge: Challenge | null) => void;
   submitFlag: (challengeId: string, flag: string) => boolean;
+  loadChallenges: () => Promise<void>;
+  loadCurrentCTF: () => Promise<void>;
   
   // Admin actions
   toggleChallengeEnabled: (challengeId: string) => void;
@@ -41,9 +43,9 @@ export const useCTFStore = create<CTFStore>((set, get) => ({
   session: null,
   isAuthenticated: false,
   isAdmin: false,
-  currentCTF: mockCTF,
-  challenges: mockChallenges,
-  teams: mockTeams,
+  currentCTF: null,
+  challenges: [],
+  teams: [],
   currentView: 'login',
   selectedChallenge: null,
   
@@ -54,7 +56,7 @@ export const useCTFStore = create<CTFStore>((set, get) => ({
       isAuthenticated: !!user
     });
     
-    // Check if user is admin
+    // Check if user is admin and load data if authenticated
     if (user) {
       supabase
         .from('profiles')
@@ -64,6 +66,11 @@ export const useCTFStore = create<CTFStore>((set, get) => ({
         .then(({ data }) => {
           set({ isAdmin: data?.is_admin || false });
         });
+      
+      // Load challenges and CTF data when user logs in
+      setTimeout(() => {
+        get().loadChallenges();
+      }, 0);
     } else {
       set({ isAdmin: false });
     }
@@ -138,5 +145,83 @@ export const useCTFStore = create<CTFStore>((set, get) => ({
     const { challenges } = get();
     const updatedChallenges = challenges.filter(c => c.id !== challengeId);
     set({ challenges: updatedChallenges });
+  },
+
+  // Load data functions
+  loadChallenges: async () => {
+    try {
+      const { data: ctfEvents } = await supabase
+        .from('ctf_events')
+        .select('*')
+        .eq('enabled', true)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
+      if (ctfEvents && ctfEvents.length > 0) {
+        const currentEvent = ctfEvents[0];
+        set({ currentCTF: {
+          id: currentEvent.id,
+          name: currentEvent.name,
+          description: currentEvent.description || '',
+          startTime: new Date(currentEvent.start_time),
+          endTime: new Date(currentEvent.end_time),
+          isPublic: currentEvent.is_public,
+          enabled: currentEvent.enabled,
+          challenges: []
+        }});
+
+        const { data: challenges } = await supabase
+          .from('challenges')
+          .select('*')
+          .eq('ctf_event_id', currentEvent.id)
+          .eq('enabled', true);
+
+        if (challenges) {
+          const formattedChallenges = challenges.map(c => ({
+            id: c.id,
+            title: c.title,
+            description: c.description,
+            category: c.category as 'Web' | 'Pwn' | 'Crypto' | 'Forensics' | 'Reverse' | 'Misc',
+            points: c.points,
+            flag: c.flag,
+            hints: Array.isArray(c.hints) ? c.hints as any[] : [],
+            files: c.files || [],
+            solves: 0,
+            enabled: c.enabled,
+            ctfId: c.ctf_event_id
+          }));
+          set({ challenges: formattedChallenges });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading challenges:', error);
+    }
+  },
+
+  loadCurrentCTF: async () => {
+    try {
+      const { data: ctfEvents } = await supabase
+        .from('ctf_events')
+        .select('*')
+        .eq('enabled', true)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
+      if (ctfEvents && ctfEvents.length > 0) {
+        const currentEvent = ctfEvents[0];
+        set({ currentCTF: {
+          id: currentEvent.id,
+          name: currentEvent.name,
+          description: currentEvent.description || '',
+          startTime: new Date(currentEvent.start_time),
+          endTime: new Date(currentEvent.end_time),
+          isPublic: currentEvent.is_public,
+          enabled: currentEvent.enabled,
+          challenges: []
+        }});
+      }
+    } catch (error) {
+      console.error('Error loading CTF:', error);
+    }
   }
 }));
