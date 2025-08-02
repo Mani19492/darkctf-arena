@@ -188,6 +188,9 @@ const CTFPlatform: React.FC = () => {
       case 'admin-htb':
         const AdminHTBClubRequests = React.lazy(() => import('./AdminHTBClubRequests'));
         return <React.Suspense fallback={<div>Loading...</div>}><AdminHTBClubRequests /></React.Suspense>;
+      case 'admin-reset':
+        const AdminResetPanel = React.lazy(() => import('./AdminResetPanel'));
+        return <React.Suspense fallback={<div>Loading...</div>}><AdminResetPanel /></React.Suspense>;
       default:
         return <ChallengeList />;
     }

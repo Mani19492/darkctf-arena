@@ -17,7 +17,7 @@ interface CTFStore {
   teams: Team[];
   
   // UI state
-  currentView: 'challenges' | 'leaderboard' | 'admin' | 'profile' | 'admin-users' | 'login' | 'htb-leaderboard' | 'admin-htb';
+  currentView: 'challenges' | 'leaderboard' | 'admin' | 'profile' | 'admin-users' | 'login' | 'htb-leaderboard' | 'admin-htb' | 'admin-reset';
   selectedChallenge: Challenge | null;
   
   // Actions
@@ -119,8 +119,8 @@ export const useCTFStore = create<CTFStore>((set, get) => ({
         return false; // Already solved
       }
 
-      // Check if flag is correct
-      if (challenge.flag === flag) {
+      // Check if flag is correct (trim whitespace and ensure case-sensitive comparison)
+      if (challenge.flag.trim() === flag.trim()) {
         // Get user's team
         const { data: teamMember } = await supabase
           .from('team_members')

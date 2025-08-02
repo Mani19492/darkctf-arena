@@ -93,8 +93,8 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge }) => {
             {challenge.hints.length > 0 && (
               <div>
                 <h4 className="text-sm font-semibold text-neon-purple mb-2">Hints Available:</h4>
-                {challenge.hints.map((hint) => (
-                  <div key={hint.id} className="text-sm text-muted-foreground bg-cyber-light p-2 rounded">
+                {challenge.hints.map((hint, index) => (
+                  <div key={hint.id || `hint-${index}`} className="text-sm text-muted-foreground bg-cyber-light p-2 rounded">
                     {hint.text} <span className="text-orange-400">(-{hint.pointDeduction}pts)</span>
                   </div>
                 ))}
@@ -105,9 +105,9 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge }) => {
               <div>
                 <h4 className="text-sm font-semibold text-neon-blue mb-2">Challenge Files:</h4>
                 <div className="flex flex-wrap gap-2">
-                  {challenge.files.map((file) => (
+                  {challenge.files.map((file, index) => (
                     <Button
-                      key={file}
+                      key={`${file}-${index}`}
                       variant="outline"
                       size="sm"
                       className="text-xs border-cyber-light hover:border-neon-blue"

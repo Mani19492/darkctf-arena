@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCTFStore } from '@/lib/store';
-import { Terminal, Shield, User, LogOut, Settings, Users, Crown } from 'lucide-react';
+import { Terminal, Shield, User, LogOut, Settings, Users, Crown, RotateCcw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Navbar: React.FC = () => {
@@ -32,7 +32,8 @@ const Navbar: React.FC = () => {
     navItems.push(
       { id: 'admin', label: 'CTF Admin', icon: Settings },
       { id: 'admin-users', label: 'User Admin', icon: Users },
-      { id: 'admin-htb', label: 'HTB Requests', icon: Shield }
+      { id: 'admin-htb', label: 'HTB Requests', icon: Shield },
+      { id: 'admin-reset', label: 'Reset Panel', icon: RotateCcw }
     );
   }
 
@@ -44,7 +45,7 @@ const Navbar: React.FC = () => {
             <div className="flex items-center">
               <Terminal className="h-8 w-8 text-neon-green shadow-neon" />
               <span className="ml-2 text-2xl font-bold bg-gradient-cyber bg-clip-text text-transparent">
-                CyberCTF
+                HTBAU
               </span>
             </div>
           </div>
