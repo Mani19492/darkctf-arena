@@ -26,7 +26,7 @@ interface CTFStore {
   logout: () => void;
   setCurrentView: (view: string) => void;
   setSelectedChallenge: (challenge: Challenge | null) => void;
-  submitFlag: (challengeId: string, flag: string) => boolean;
+  submitFlag: (challengeId: string, flag: string) => Promise<boolean>;
   loadChallenges: () => Promise<void>;
   loadCurrentCTF: () => Promise<void>;
   
@@ -99,19 +99,99 @@ export const useCTFStore = create<CTFStore>((set, get) => ({
     set({ selectedChallenge: challenge });
   },
   
-  submitFlag: (challengeId: string, flag: string) => {
-    const { challenges } = get();
+  submitFlag: async (challengeId: string, flag: string) => {
+    const { challenges, currentUser } = get();
     const challenge = challenges.find(c => c.id === challengeId);
     
-    if (challenge && challenge.flag === flag) {
-      // Mark challenge as solved
-      const updatedChallenges = challenges.map(c => 
-        c.id === challengeId ? { ...c, solves: c.solves + 1 } : c
-      );
-      set({ challenges: updatedChallenges });
-      return true;
+    if (!challenge || !currentUser) return false;
+    
+    try {
+      // Check if user already solved this challenge
+      const { data: existingSolve } = await supabase
+        .from('submissions')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .eq('challenge_id', challengeId)
+        .eq('is_correct', true)
+        .single();
+
+      if (existingSolve) {
+        return false; // Already solved
+      }
+
+      // Check if flag is correct
+      if (challenge.flag === flag) {
+        // Get user's team
+        const { data: teamMember } = await supabase
+          .from('team_members')
+          .select('team_id')
+          .eq('user_id', currentUser.id)
+          .single();
+
+        if (!teamMember) return false;
+
+        // Create submission record
+        await supabase
+          .from('submissions')
+          .insert({
+            user_id: currentUser.id,
+            team_id: teamMember.team_id,
+            challenge_id: challengeId,
+            flag: flag,
+            is_correct: true
+          });
+
+        // Get current team points and update
+        const { data: team } = await supabase
+          .from('teams')
+          .select('points')
+          .eq('id', teamMember.team_id)
+          .single();
+
+        const newPoints = (team?.points || 0) + challenge.points;
+
+        // Update team points
+        await supabase
+          .from('teams')
+          .update({ 
+            points: newPoints,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', teamMember.team_id);
+
+        // Update local challenge solves count
+        const updatedChallenges = challenges.map(c => 
+          c.id === challengeId ? { ...c, solves: c.solves + 1 } : c
+        );
+        set({ challenges: updatedChallenges });
+        
+        return true;
+      }
+      
+      // Record incorrect submission
+      const { data: teamMember } = await supabase
+        .from('team_members')
+        .select('team_id')
+        .eq('user_id', currentUser.id)
+        .single();
+
+      if (teamMember) {
+        await supabase
+          .from('submissions')
+          .insert({
+            user_id: currentUser.id,
+            team_id: teamMember.team_id,
+            challenge_id: challengeId,
+            flag: flag,
+            is_correct: false
+          });
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error submitting flag:', error);
+      return false;
     }
-    return false;
   },
   
   // Admin actions

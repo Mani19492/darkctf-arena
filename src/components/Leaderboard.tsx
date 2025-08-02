@@ -14,6 +14,45 @@ interface LeaderboardEntry {
 
 const Leaderboard: React.FC = () => {
   const [leaderboard, setLeaderboard] = React.useState<LeaderboardEntry[]>([]);
+
+  React.useEffect(() => {
+    loadLeaderboard();
+  }, []);
+
+  const loadLeaderboard = async () => {
+    try {
+      const { data: teams } = await supabase
+        .from('teams')
+        .select(`
+          id,
+          name,
+          points,
+          updated_at,
+          submissions!inner (
+            is_correct,
+            submitted_at,
+            challenge_id
+          )
+        `)
+        .eq('submissions.is_correct', true);
+
+      if (teams) {
+        const leaderboardData = teams.map((team, index) => ({
+          rank: index + 1,
+          teamName: team.name,
+          points: team.points,
+          lastSubmission: new Date(team.updated_at),
+          solvedChallenges: team.submissions?.filter(s => s.is_correct).length || 0
+        }))
+        .sort((a, b) => b.points - a.points)
+        .map((team, index) => ({ ...team, rank: index + 1 }));
+
+        setLeaderboard(leaderboardData);
+      }
+    } catch (error) {
+      console.error('Error loading leaderboard:', error);
+    }
+  };
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:

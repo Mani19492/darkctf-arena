@@ -27,8 +27,9 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge }) => {
     Misc: 'bg-yellow-500 text-cyber-dark'
   };
 
-  const handleSubmitFlag = () => {
-    if (submitFlag(challenge.id, flagInput)) {
+  const handleSubmitFlag = async () => {
+    const result = await submitFlag(challenge.id, flagInput);
+    if (result) {
       toast({
         title: "Flag Correct!",
         description: `You earned ${challenge.points} points!`,
